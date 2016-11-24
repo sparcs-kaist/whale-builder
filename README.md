@@ -1,8 +1,7 @@
 # golang-builder
 [![](https://badge.imagelayers.io/centurylink/golang-builder.svg)](https://imagelayers.io/?images=centurylink/golang-builder:latest 'Get your own badge on imagelayers.io')
 
-Containerized build environment for compiling an executable Golang package and packaging
-it in a light-weight Docker container.
+Containerized build environment for compiling an executable Golang package.
 
 ## Overview
 One of the (many) benefits of developing with Go is that you have the option of compiling your application into a self-contained, statically-linked binary. A statically-linked binary can be run in a container with NO other dependencies which means you can create incredibly small images.
@@ -32,7 +31,6 @@ In order for the golang-builder to work properly with your project, you need to 
 The *golang-builder* assumes that your "main" package (the package containing your executable command) is at the root of your project directory structure.
 
     .
-    ├─Dockerfile
     ├─api
     | ├─api.go
     | └─api_test.go

@@ -5,8 +5,8 @@ source /build_environment.sh
 # Grab the last segment from the package name
 name=${pkgName##*/}
 
-BUILD_GOOS=${BUILD_GOOS:-"darwin linux"}
-BUILD_GOARCH=${BUILD_GOARCH:-"386 amd64"}
+BUILD_GOOS=${BUILD_GOOS:-"darwin linux windows"}
+BUILD_GOARCH=${BUILD_GOARCH:-"386 amd64 arm"}
 
 for goos in $BUILD_GOOS; do
         for goarch in $BUILD_GOARCH; do
@@ -16,19 +16,12 @@ for goos in $BUILD_GOOS; do
                 # either export them or do this. My theory is that it's somehow
                 # building in another process that doesn't have access to the
                 # loop variables. That caused everything to be built for linux.
-                `GOOS=$goos GOARCH=$goarch go build \
-                        -v \
+                `GOOS=$goos GOARCH=$goarch CGO_ENABLED=${CGO_ENABLED:-0} go build \
+                        -a \
                         -o $name-$goos-$goarch \
+                        --installsuffix cgo \
+                        --ldflags="${LDFLAGS:--s}" \
                         $pkgName`
                 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
         done
 done
-
-if [ -e "/var/run/docker.sock" ] && [ -e "./Dockerfile" ];
-then
-  # Default TAG_NAME to package name if not set explicitly
-  tagName=${tagName:-"$name":latest}
-
-  # Build the image from the Dockerfile in the package directory
-  docker build -t $tagName .
-fi
