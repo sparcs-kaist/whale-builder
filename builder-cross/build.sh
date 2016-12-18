@@ -1,9 +1,15 @@
 #!/bin/bash
 
-source /build_environment.sh
+source /build_environment.sh $1
 
 # Grab the last segment from the package name
 name=${pkgName##*/}
+
+mainPackagePath=$1
+if [[ ! -z "${mainPackagePath}" ]];
+then
+  cd ${mainPackagePath}
+fi
 
 BUILD_GOOS=${BUILD_GOOS:-"darwin linux windows"}
 BUILD_GOARCH=${BUILD_GOARCH:-"386 amd64 arm"}
@@ -20,8 +26,7 @@ for goos in $BUILD_GOOS; do
                         -a \
                         -o $name-$goos-$goarch \
                         --installsuffix cgo \
-                        --ldflags="${LDFLAGS:--s}" \
-                        $pkgName`
+                        --ldflags="${LDFLAGS:--s}"`
                 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
         done
 done

@@ -1,9 +1,15 @@
 #!/bin/bash -e
 
-source /build_environment.sh
+source /build_environment.sh $1
 
 # Grab the last segment from the package name
 name=${pkgName##*/}
+
+mainPackagePath=$1
+if [[ ! -z "${mainPackagePath}" ]];
+then
+  cd ${mainPackagePath}
+fi
 
 #
 # Optional OUTPUT env var to use the "-o" go build switch
@@ -24,8 +30,7 @@ echo "Building $pkgName"
   -a \
   ${output} \
   --installsuffix cgo \
-  --ldflags="${LDFLAGS:--s}" \
-  $pkgName
+  --ldflags="${LDFLAGS:--s}"
 )
 
 if [[ "$COMPRESS_BINARY" == "true" ]];

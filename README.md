@@ -1,9 +1,11 @@
 # golang-builder
+
 [![](https://images.microbadger.com/badges/image/portainer/golang-builder.svg)](https://microbadger.com/images/portainer/golang-builder "Get your own image badge on microbadger.com")
 
 Containerized build environment for compiling an executable Golang package.
 
 ## Overview
+
 One of the (many) benefits of developing with Go is that you have the option of compiling your application into a self-contained, statically-linked binary. A statically-linked binary can be run in a container with NO other dependencies which means you can create incredibly small images.
 
 With a statically-linked binary, you could have a Dockerfile that looks something like this:
@@ -25,9 +27,11 @@ and generate a minimal Docker image containing that binary.
 The implementation of the *golang-builder* was heavily inspired by the [Create the Smallest Possible Docker Container](http://blog.xebia.com/2014/07/04/create-the-smallest-possible-docker-container/) post on the [Xebia blog](http://blog.xebia.com).
 
 ## Requirements
+
 In order for the golang-builder to work properly with your project, you need to follow a few simple conventions:
 
 ### Project Structure
+
 The *golang-builder* assumes that your "main" package (the package containing your executable command) is at the root of your project directory structure.
 
     .
@@ -43,6 +47,15 @@ The *golang-builder* assumes that your "main" package (the package containing yo
 In the example above, the `hello.go` source file defines the "main" package for this project and lives at the root of the project directory structure. This project defines other packages ("api" and "greeting") but those are subdirectories off the root.
 
 This convention is in place so that the *golang-builder* knows where to find the "main" package in the project structure. In a future release, we may make this a configurable option in order to support projects with different directory structures.
+
+You can override this behaviour by specifying the path to your "main" package as a parameter to the Docker image (b sure to use the same folder prefix as the mounted directory in the container e.g. `/src` in this example ).
+
+```shell
+docker run --rm \
+  -v "$(pwd):/src" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  portainer/golang-builder /src/subfolder/main
+```
 
 ### Canonical Import Path
 In addition to knowing where to find the "main" package, the *golang-builder* also needs to know the fully-qualified package name for your application. For the "hello" application shown above, the fully-qualified package name for the executable is "github.com/CenturyLink/hello" but there is no way to determine that just by looking at the project directory structure (during the development, the project directory would likely be mounted at `$GOPATH/src/github.com/CenturyLink/hello` so that the Go tools can determine the package name).
@@ -88,7 +101,7 @@ Assuming that the source code for your Go executable package is located at
     docker run --rm \
       -v "$(pwd):/src" \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      centurylink/golang-builder
+      portainer/golang-builder
 
 This would result in the creation of a new Docker image named `hello:latest`.
 
@@ -97,12 +110,12 @@ Note that the image tag is generated dynamically from the name of the Go package
     docker run --rm \
       -v "$(pwd):/src" \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      centurylink/golang-builder \
+      portainer/golang-builder \
       centurylink/hello:1.0
 
 If you just want to compile your application without packaging it in a Docker image you can simply run *golang-builder* without mounting the Docker socket.
 
-    docker run --rm -v $(pwd):/src centurylink/golang-builder
+    docker run --rm -v $(pwd):/src portainer/golang-builder
 
 ### Additional Options
 
@@ -119,11 +132,11 @@ The above are environment variables to be passed to the docker run command:
       -e COMPRESS_BINARY=true \
       -e OUTPUT=/bin/my_go_binary \
       -v $(pwd):/src \
-      centurylink/golang-builder
+      portainer/golang-builder
 
 ### Cross-compilation
 
-An additional image, `centurylink/golang-builder-cross`, exists that works identically to `golang-builder` save for the presence of the additional options presented above. This uses a larger base image that will build linux and OSX binaries for 32- and 64-bit, named like `mypackage-darwin-amd64`. This will use CGO, and you may find that some code – for example things from the `os` package – do not behave the same under cross-compilation in a container as they do natively compiled in OSX.
+An additional image, `portainer/golang-builder:cross-platform`, exists that works identically to `golang-builder` save for the presence of the additional options presented above. This uses a larger base image that will build linux and OSX binaries for 32- and 64-bit, named like `mypackage-darwin-amd64`. This will use CGO, and you may find that some code – for example things from the `os` package – do not behave the same under cross-compilation in a container as they do natively compiled in OSX.
 
 By default it will build Linux and OSX binaries for 32- and 64-bit but you can override this with environment variables.
 
@@ -131,7 +144,7 @@ docker run --rm \
   -e BUILD_GOOS="linux" \
   -e BUILD_GOARCH="arm amd64" \
   -v $(pwd):/src \
-  centurylink/golang-builder-cross
+  portainer/golang-builder:cross-platform
 
 This command will build Linux binaries for amd64 and arm.
 

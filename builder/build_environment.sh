@@ -1,7 +1,5 @@
 #!/bin/bash
 
-tagName=$1
-
 if ( find /src -maxdepth 0 -empty | read v );
 then
   echo "Error: Must mount Go source code into /src directory"
@@ -9,7 +7,13 @@ then
 fi
 
 # Grab Go package name
-pkgName="$(go list -e -f '{{.ImportComment}}' 2>/dev/null || true)"
+mainPackagePath=$1
+if [[ ! -z "${mainPackagePath}" ]];
+then
+  pkgName="$(cd /src/cmd/portainer && go list -e -f '{{.ImportComment}}' 2>/dev/null || true)"
+else
+  pkgName="$(go list -e -f '{{.ImportComment}}' 2>/dev/null || true)"
+fi
 
 if [ -z "$pkgName" ];
 then
