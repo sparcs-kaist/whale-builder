@@ -1,5 +1,8 @@
 #!/bin/bash
 
+BUILD_GOOS=${BUILD_GOOS:-""}
+BUILD_GOARCH=${BUILD_GOARCH:-""}
+
 if ( find /src -maxdepth 0 -empty | read v );
 then
   echo "Error: Must mount Go source code into /src directory"
@@ -43,5 +46,5 @@ then
   GOPATH=$pkgPath/Godeps/_workspace:$GOPATH
 else
   # Get all package dependencies
-  go get -t -d -v ./...
+  `GOOS=${BUILD_GOOS:-""} GOARCH=${BUILD_GOARCH:-""} go get -t -d -v ./...`
 fi
